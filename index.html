@@ -3,60 +3,94 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Snake</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="snake.css" />
 </head>
 
 <body>
   <main class="device">
-    <div class="device__brand">NOKIA</div>
+    <header class="device__brand">Nokia</header>
 
-    <div class="screen">
+    <section class="screen" aria-label="Game screen">
       <div class="screen__hud">
         <div class="hud__cell">
-          <span class="hud__label">SCORE</span>
+          <span class="hud__label">Score</span>
           <span class="hud__value" id="score">0</span>
         </div>
         <div class="hud__cell hud__cell--center">
-          <span class="hud__label">LEVEL</span>
-          <span class="hud__value hud__value--small" id="levelName">EASY</span>
+          <span class="hud__label">Level</span>
+          <span class="hud__value hud__value--level" id="levelName">Easy</span>
         </div>
         <div class="hud__cell hud__cell--right">
-          <span class="hud__label">BEST</span>
+          <span class="hud__label">Best</span>
           <span class="hud__value" id="best">0</span>
         </div>
       </div>
 
       <div class="screen__board">
-        <canvas id="board" width="320" height="320"></canvas>
+        <canvas id="board" width="320" height="320" aria-label="Snake game board"></canvas>
         <div class="overlay hidden" id="overlay"></div>
       </div>
 
       <div class="screen__footer">
-        <span id="status">READY</span>
-        <button class="sound-toggle" id="soundBtn" aria-label="Toggle sound" type="button">
-          <span id="soundIcon">♪ ON</span>
+        <span class="footer__status" id="statusWrap" data-state="menu">
+          <span class="status__dot" aria-hidden="true"></span>
+          <span id="status">Ready</span>
+        </span>
+        <button class="sound-toggle" id="soundBtn" aria-label="Toggle sound" aria-pressed="true" type="button">
+          <svg class="icon icon--sound-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+          <svg class="icon icon--sound-off" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <line x1="22" y1="9" x2="16" y2="15" />
+            <line x1="16" y1="9" x2="22" y2="15" />
+          </svg>
+          <span id="soundIcon">On</span>
         </button>
-        <span class="footer__speed">SPD <span id="speed">1</span></span>
+        <span class="footer__speed">Speed <span id="speed">1</span></span>
       </div>
-    </div>
+    </section>
 
     <div class="controls">
-      <div class="dpad" aria-label="Direction pad">
-        <button class="dpad__btn dpad__btn--up" data-dir="up" aria-label="Up">▲</button>
-        <button class="dpad__btn dpad__btn--left" data-dir="left" aria-label="Left">◀</button>
-        <button class="dpad__btn dpad__btn--center" id="pauseBtn" aria-label="Pause">❚❚</button>
-        <button class="dpad__btn dpad__btn--right" data-dir="right" aria-label="Right">▶</button>
-        <button class="dpad__btn dpad__btn--down" data-dir="down" aria-label="Down">▼</button>
+      <div class="dpad" role="group" aria-label="Direction pad">
+        <button class="dpad__btn dpad__btn--up" data-dir="up" aria-label="Up" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+        <button class="dpad__btn dpad__btn--left" data-dir="left" aria-label="Left" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <button class="dpad__btn dpad__btn--center" id="pauseBtn" aria-label="Pause" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="6" y="4" width="4" height="16" rx="1" />
+            <rect x="14" y="4" width="4" height="16" rx="1" />
+          </svg>
+        </button>
+        <button class="dpad__btn dpad__btn--right" data-dir="right" aria-label="Right" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+        <button class="dpad__btn dpad__btn--down" data-dir="down" aria-label="Down" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
       </div>
     </div>
 
-    <div class="device__label">SNAKE II</div>
+    <footer class="device__label">Snake II</footer>
   </main>
 
   <script src="snake.js"></script>
