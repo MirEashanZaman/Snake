@@ -22,28 +22,28 @@ const OPPOSITE = { up: "down", down: "up", left: "right", right: "left" };
 
 const LEVELS = {
     easy: {
-        name: "EASY",
+        name: "Easy",
         baseTick: 210,
         minTick: 150,
         speedStep: 2,
         walls: () => [],
     },
     normal: {
-        name: "NORMAL",
+        name: "Normal",
         baseTick: 130,
         minTick: 75,
         speedStep: 6,
         walls: () => [],
     },
     hard: {
-        name: "HARD",
+        name: "Hard",
         baseTick: 100,
         minTick: 60,
         speedStep: 6,
         walls: () => buildBorderWalls(),
     },
     insane: {
-        name: "INSANE",
+        name: "Insane",
         baseTick: 75,
         minTick: 45,
         speedStep: 7,
@@ -67,6 +67,7 @@ const scoreEl = $("score");
 const bestEl = $("best");
 const speedEl = $("speed");
 const statusEl = $("status");
+const statusWrap = $("statusWrap");
 const levelNameEl = $("levelName");
 const overlay = $("overlay");
 const pauseBtn = $("pauseBtn");
@@ -150,8 +151,9 @@ const sound = {
 };
 
 function updateSoundUi() {
-    soundIcon.textContent = sound.enabled ? "♪ ON" : "♪ OFF";
+    soundIcon.textContent = sound.enabled ? "On" : "Off";
     soundBtn.dataset.on = String(sound.enabled);
+    soundBtn.setAttribute("aria-pressed", String(sound.enabled));
 }
 
 function buildBorderWalls() {
@@ -314,8 +316,9 @@ function updateHud() {
     speedEl.textContent = String(level);
 }
 
-function setStatus(label) {
+function setStatus(label, stateKey = state.status) {
     statusEl.textContent = label;
+    if (statusWrap) statusWrap.dataset.state = stateKey;
 }
 
 function clearOverlay() {
@@ -332,7 +335,7 @@ function renderMenu() {
     const levels = Object.entries(LEVELS)
         .map(
             ([key, cfg]) => `
-<button class="level-btn" data-level="${key}" data-selected="${key === state.level}">
+<button class="level-btn" type="button" data-level="${key}" data-selected="${key === state.level}">
 ${cfg.name}
 </button>
 `,
@@ -340,15 +343,13 @@ ${cfg.name}
         .join("");
     setOverlayContent(`
 <div class="overlay__panel">
-<h1 class="overlay__title">SNAKE</h1>
-<p class="overlay__subtitle">SELECT LEVEL</p>
+<h1 class="overlay__title">Snake</h1>
+<p class="overlay__subtitle">Select level</p>
 <div class="level-grid">${levels}</div>
 <div class="menu-actions">
-<button class="overlay__btn" id="startBtn">START</button>
+<button class="overlay__btn" type="button" id="startBtn">Start</button>
 </div>
-<p class="overlay__hint" style="margin-top:12px;margin-bottom:0">
-RETURN TO NOSTALGIA
-</p>
+<p class="overlay__hint">Arrows or WASD · Space to pause</p>
 </div>
 `);
     overlay.querySelectorAll(".level-btn").forEach((btn) => {
@@ -374,12 +375,12 @@ RETURN TO NOSTALGIA
 function renderPause() {
     setOverlayContent(`
 <div class="overlay__panel">
-<h1 class="overlay__title">PAUSED</h1>
-<p class="overlay__subtitle">${LEVELS[state.level].name} · SCORE ${state.score}</p>
+<h1 class="overlay__title">Paused</h1>
+<p class="overlay__subtitle">${LEVELS[state.level].name} · Score ${state.score}</p>
 <div class="menu-actions">
-<button class="overlay__btn" id="resumeBtn">RESUME</button>
-<button class="overlay__btn overlay__btn--secondary" id="restartBtn">RESTART</button>
-<button class="overlay__btn overlay__btn--secondary" id="menuBtn">MAIN MENU</button>
+<button class="overlay__btn" type="button" id="resumeBtn">Resume</button>
+<button class="overlay__btn overlay__btn--secondary" type="button" id="restartBtn">Restart</button>
+<button class="overlay__btn overlay__btn--secondary" type="button" id="menuBtn">Main menu</button>
 </div>
 </div>
 `);
@@ -400,22 +401,21 @@ function renderPause() {
 function renderGameOver() {
     setOverlayContent(`
 <div class="overlay__panel">
-<h1 class="overlay__title">GAME OVER</h1>
+<h1 class="overlay__title">Game over</h1>
 <p class="overlay__subtitle">${LEVELS[state.level].name}</p>
 <div class="score-row">
-<div>SCORE<strong>${state.score}</strong></div>
-<div>BEST<strong>${state.best}</strong></div>
+<div>Score<strong>${state.score}</strong></div>
+<div>Best<strong>${state.best}</strong></div>
 </div>
 <div class="menu-actions">
-<button class="overlay__btn" id="againBtn">PLAY AGAIN</button>
-<button class="overlay__btn overlay__btn--secondary" id="menuBtn">MAIN MENU</button>
+<button class="overlay__btn" type="button" id="againBtn">Play again</button>
+<button class="overlay__btn overlay__btn--secondary" type="button" id="menuBtn">Main menu</button>
 </div>
 </div>
 `);
     overlay.querySelector("#againBtn").addEventListener("click", () => {
         sound.click();
         restartCurrentLevel();
-        start();
     });
     overlay.querySelector("#menuBtn").addEventListener("click", () => {
         sound.click();
@@ -433,7 +433,7 @@ function start() {
     if (state.bigFood) {
         state.bigFood.expiresAt = performance.now() + BIG_EGG_LIFETIME_MS;
     }
-    setStatus("PLAY");
+    setStatus("Playing", "running");
     clearOverlay();
     loop(state.lastTick);
 }
@@ -442,7 +442,7 @@ function pause() {
     if (state.status !== "running") return;
     state.status = "paused";
     cancelAnimationFrame(state.rafId);
-    setStatus("PAUSE");
+    setStatus("Paused", "paused");
     sound.pause();
     renderPause();
 }
@@ -454,7 +454,7 @@ function resume() {
     if (state.bigFood && state.bigFood.expiresAt < performance.now()) {
         state.bigFood = null;
     }
-    setStatus("PLAY");
+    setStatus("Playing", "running");
     clearOverlay();
     loop(state.lastTick);
 }
@@ -470,7 +470,7 @@ function goToMenu() {
     cancelAnimationFrame(state.rafId);
     state.status = "menu";
     reset();
-    setStatus("READY");
+    setStatus("Ready", "menu");
     renderMenu();
 }
 
@@ -482,7 +482,7 @@ function gameOver() {
         localStorage.setItem(bestKey(), String(state.best));
     }
     updateHud();
-    setStatus("OVER");
+    setStatus("Game over", "over");
     sound.over();
     flashBoard();
     setTimeout(() => renderGameOver(), 350);
@@ -786,5 +786,5 @@ canvas.addEventListener(
 if (!LEVELS[state.level]) state.level = "easy";
 updateSoundUi();
 reset();
-setStatus("READY");
+setStatus("Ready", "menu");
 renderMenu();
